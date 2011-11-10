@@ -1,5 +1,4 @@
-from nsp import sentence_split
+from nsp import ssplit
 
-ssplit = sentence_split
 
 __all__ = ["ssplit"]

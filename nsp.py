@@ -2,9 +2,11 @@
 # coding: utf-8
 from wdict import Wdict
 from os.path import abspath, dirname
+import re
+import string
 
-filename = 'cooked.dict'
-df = open(dirname(abspath(__file__)) + '/' + filename)
+filename = '/cooked.dict'
+df = open(dirname(abspath(__file__)) + filename)
 word_dict = Wdict(df)
 
 N = 2 # default 2 shortest path
@@ -57,7 +59,7 @@ def nsp_algorithm(s):
             neednt_loop = False
 
             if pre == 0:
-                cur_table.append([1, {(0,-1)}])
+                cur_table.append([1, set([(0,-1)])])
                 return
 
             for index, row in enumerate(self._t[pre]):
@@ -70,10 +72,10 @@ def nsp_algorithm(s):
                 while i < len(cur_table):
                     # find where to insert
                     if sum_weight == cur_table[i][0]:
-                        cur_table[i][1] |= {item} # did this set need?
+                        cur_table[i][1] |= set([item]) # did this set need?
                         break
                     elif sum_weight < cur_table[i][0]:
-                        cur_table[i:i] = [[sum_weight, {item}]]
+                        cur_table[i:i] = [[sum_weight,set([item])]]
                         if len(cur_table) > self.each_table_size:
                             cur_table.pop()
                             dontloop = True
@@ -82,10 +84,10 @@ def nsp_algorithm(s):
                         i += 1
                 else:
                     if len(cur_table) < self.each_table_size:
-                        cur_table.append([sum_weight, {item}])
+                        cur_table.append([sum_weight,set([item])])
 
                 if not len(cur_table): # cur_table is empty
-                    cur_table.append([sum_weight, {item}])
+                    cur_table.append([sum_weight, set([item])])
 
 
     bt_table = BackTraceTables(s)
@@ -116,8 +118,6 @@ def rough_split(s):
     return set_of_result
 
 def sentence_split(s):
-    if not isinstance(s, unicode):
-        s = s.decode('utf-8')
 
     possible_split =  rough_split(s)
 
@@ -138,7 +138,62 @@ def sentence_split(s):
     result = []
     for l, r in zip(max_combintion[0:-1], max_combintion[1:]):
         result.append(s[l:r])
-    return [i.encode('utf-8') for i in result]
+    return result
+
+def ssplit(s):
+    if not s:
+        return []
+
+    if not isinstance(s, unicode):
+        s = s.decode('utf-8')
+
+        result = []
+        asciiletters = string.digits + string.letters + string.punctuation
+        # status: 
+        # 0 init
+        # 1 ascii
+        # 2 white
+        # 3 chinese
+        status = 0
+        beg = 0
+        for i, c in enumerate(s):
+            end = i
+            if c in asciiletters:
+                if status != 1:
+                    seg = s[beg:end]
+                    if seg:
+                        if status == 2:
+                            result.append(seg)
+                        else:
+                            result.extend(sentence_split(seg))
+                    status = 1
+                    beg = i
+            elif c in string.whitespace:
+                if status != 2:
+                    seg = s[beg:end]
+                    if seg:
+                        if status == 1:
+                            result.append(seg)
+                        else:
+                            result.extend(sentence_split(seg))
+                    status = 2
+                    beg = i
+            else:
+                if status != 3:
+                    seg = s[beg:end]
+                    if seg:
+                        result.append(seg)
+                    status = 3
+                    beg = i
+
+        seg = s[beg:end + 1]
+        if status in (1, 2):
+            result.append(seg)
+        else:
+            result.extend(sentence_split(seg))
+
+        return [i.encode('utf-8') for i in result]
+
 
 if __name__ == "__main__":
     #s = u'江泽民在北京人民大会堂会见参加全国法院工作会议和全国法院系统打击经济犯罪先进集体表彰大会代表时要求大家要充分认识打击经济犯罪的艰巨性和长期性'
