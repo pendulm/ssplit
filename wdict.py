@@ -9,7 +9,7 @@ class Wdict(object):
         self._cache = {}
         self.build_dict(f)
         self._d.append(None)
-        self._p.append(-1)
+        self._p.append(-1) # mark reached end
         self.size = len(self._d)
 
     def __contains__(self, item):
@@ -31,17 +31,18 @@ class Wdict(object):
         return self.size
 
     def build_dict(self, f):
-        # only call one time
+        # only call once
         self._d = []
         self._p = array.array('l')
         for l in f:
             uni, prob = l.split()
             self._d.append(uni.decode('utf-8'))
             prob = int(prob)
-            if prob:
-                self._p.append(prob)
-            else:
-                self._p.append(10)
+            self._p.append(prob)
+            #if prob:
+                #self._p.append(prob)
+            #else:
+                #self._p.append(10)
 
 if __name__ == "__main__":
     with open("cooked.dict") as f:
