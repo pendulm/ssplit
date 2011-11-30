@@ -15,7 +15,7 @@ none_chinese += u'ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔ�
 end_mark = u',.:;?!，。：；？！、．\n'
 white_space = unicode(string.whitespace) + u'　'
 
-N = 2 # default 2 shortest path
+N = 1 # default 2 shortest path
 
 def build_words_link(s):
     """
@@ -95,20 +95,15 @@ class BackTraceTables(object):
             if not len(cur_table): # cur_table is empty
                 cur_table.append([sum_weight, set([item])])
 
-def nsp_algorithm(s):
-
+def rough_split(s):
     bt_table = BackTraceTables(s)
     links_table = build_words_link(s)
 
     for i, links_of_i in enumerate(links_table):
         for l in links_of_i:
             bt_table.add(l, i)
-    return bt_table
 
-def rough_split(s):
-    bt_table = nsp_algorithm(s)
     set_of_result = []
-
     def recurse(table, row_index, path):
         if table is None:
             set_of_result.append(path)
