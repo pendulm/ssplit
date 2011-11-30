@@ -15,7 +15,7 @@ none_chinese += u'ａｂｃｄｅｆｇｈｉｊｋｌｍｎｏｐｑｒｓｔ�
 end_mark = u',.:;?!，。：；？！、．\n'
 white_space = unicode(string.whitespace) + u'　'
 
-N = 1 # default 2 shortest path
+N = 1 # default 1 shortest path
 
 def build_words_link(s):
     """
